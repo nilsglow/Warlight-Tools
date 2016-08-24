@@ -1,5 +1,7 @@
 #coding: utf-8
 
+$parse_infos = []
+
 def parse_territory node
 	case node.name
 	when 'path'
@@ -29,7 +31,7 @@ def parse_territory node
 		points = [ Point[cx,cy-ry], Point[cx+rx,cy], Point[cx,cy+ry], Point[cx-rx,cy] ]
 		
 	else
-		$parse_infos << "unrecognized element #{node.name}[id=#{node['id']}]; skipping"
+		$parse_infos.push "unrecognized element #{node.name}[id=#{node['id']}]; skipping"
 	end
 	
 	transforms = []
@@ -49,7 +51,7 @@ def parse_territory node
 			
 			points.map!{|p| p + d}
 		else
-			$parse_infos << "unrecognized transform #{op} for #{node['id']}; skipping"
+			$parse_infos.push "unrecognized transform #{op} for #{node['id']}; skipping"
 		end
 	end
 	
@@ -124,7 +126,7 @@ def all_territs_in_svg svg
 	polys = territs.map{|t| pbar.inc; parse_territory t }
 	pbar.finish
 	
-	puts $parse_infos if $talktome
+	puts $parse_infos.join("\n") if $talktome
 	
 	Hash[ ids.zip(polys) ]
 end
