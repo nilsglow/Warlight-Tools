@@ -1,5 +1,7 @@
 #coding: utf-8
 
+require 'matrix'
+
 $parse_infos = []
 
 def parse_territory node
@@ -37,7 +39,7 @@ def parse_territory node
 	transforms = []
 	cur = node
 	while cur and cur.respond_to? :parent
-		transforms.unshift cur['transform']
+		transforms.push cur['transform']
 		cur = cur.parent
 	end
 	
@@ -50,6 +52,23 @@ def parse_territory node
 			d = Point[xm, ym]
 			
 			points.map!{|p| p + d}
+		when 'matrix'
+			a, b, c, d, e, f = *arg.strip.split(/[, ]+/).map{|a| a.to_f}
+			matrix = Matrix[
+				[a, c, e],
+				[b, d, f],
+				[0, 0, 1]
+			]
+
+			points.map!{|p|
+				 m = Matrix[
+					 [p.x],
+					 [p.y],
+					 [1]
+				 ]
+				 m = matrix * m
+				 Point[m.element(0,0), m.element(1,0)]
+			}
 		else
 			$parse_infos.push "unrecognized transform #{op} for #{node['id']}; skipping"
 		end
