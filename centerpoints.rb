@@ -78,8 +78,6 @@ centerpoints.each_pair do |id, point|
 end
   
 json = req.to_json
-puts json
-
 
 api = 'https://warlight.net'
 
