@@ -1,0 +1,5 @@
+email: <email address of WarLight account>
+# TODO here we should allow to configure password instead and query token
+APIToken: <APIToken as received from WarLight Token API>
+mapid: <Map ID as reported by "Link for Sharing" in WarLight map editor>
+svgfile: <path to SVG file containing the map>
