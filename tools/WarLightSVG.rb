@@ -1,10 +1,17 @@
 #coding: utf-8
 
+require 'progressbar'
 require 'savage'
 require 'nokogiri'
 require 'matrix'
 
 $parse_infos = []
+
+class Hash
+  def hmap(&block)
+    Hash[self.map {|k, v| block.call(k,v) }]
+  end
+end
 
 class WarLightSVG
   def initialize(svgfile)
@@ -139,6 +146,14 @@ class WarLightSVG
   	poly = poly.inject :+ # poly was an array of arrays of points
   	
   	return poly
+  end
+  
+  def territory_names
+    territs = @noko.css('[id^=Territory_]')
+    # our hmap method expects the block to return an array. its elements become key and value...
+    names = {}
+    territs.map{|node| names[node['id'][/\d+/]] = node["inkscape:label"] }
+    names
   end
   
   def all_polygons_as_points

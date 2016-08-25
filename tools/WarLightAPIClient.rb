@@ -31,11 +31,15 @@ class WarLightAPIClient
   end
 
   def call
+    uri = URI("https://#{self.host}#{self.path}")
+    
     http = Net::HTTP.start(self.host, nil, nil, nil, nil, nil, {:use_ssl => true})
-    req = @request.to_json
+    req = Net::HTTP::Post.new(uri)
+    req.set_content_type("application/json", {:charset => "UTF-8"})
+    req.body = @request.to_json
 
-    response = http.post(self.path, req)
-
+    response = http.request req
+    
     if response.is_a?(Net::HTTPOK) && (response.body =~ /Success/)
       puts "It appears to have worked! Go check your map in the map designer now."
     else
