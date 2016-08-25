@@ -1,5 +1,5 @@
 require 'savage'
-require 'clipper'
+#require 'clipper'
 
 module Geometry
   def area poly
@@ -79,6 +79,7 @@ module Geometry
     return dtheta
   end
 
+  # XXX do we need this for anything? clipper is not available by default
   def intersection a, b
     c = Clipper::Clipper.new
   

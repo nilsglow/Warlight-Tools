@@ -33,7 +33,7 @@ class WarLightAPIClient
   def call
     http = Net::HTTP.start(self.host, nil, nil, nil, nil, nil, {:use_ssl => true})
     req = @request.to_json
-    puts req
+
     response = http.post(self.path, req)
 
     if response.is_a?(Net::HTTPOK) && (response.body =~ /Success/)
