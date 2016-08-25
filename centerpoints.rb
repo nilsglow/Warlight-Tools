@@ -1,11 +1,8 @@
 # coding: utf-8
 
-require 'pp'
+#require 'pp'
 require 'progressbar'
 
-require 'savage'
-
-require 'nokogiri'
 require 'builder'
 require 'json'
 
@@ -18,34 +15,30 @@ require 'extensions'
 require 'bezier_curves'
 require 'area_centroid'
 require 'svg_territory_parsing'
+require 'WarLightAPIClient'
 
 
 
 
-exit if defined? Ocra
-################################################################
-# script starts here
-################################################################
+settings = "config/production.yml"
+abort "Settings file #{settings} not found!" if !File.exist? settings
 
+require 'yaml'
+settings = YAML::load_file(settings)
 
-infile = "/home/nils/work/spielentwicklung/WarLight/Wien_klein/QGIS_export2.svg"
-#infile = "test.svg"
+# check all required settings are there
+["svgfile", "mapid", "email", "APIToken"].each {|key|
+  abort "#{key} not found in settings!" if !settings.key?(key) or !settings[key]
+}
 
+abort "File #{settings["svgfile"]} not found!" if !File.exist? settings["svgfile"]
 
-while !File.exist? infile
-  puts 'No such file!'
-  exit
-end
-
-mapid = 59396
-email = ''
-APIToken = ''
 
 puts 'Working... this may take some time. Go have a cup of tea or something.'
 $talktome = true
 
-svg = File.read infile
-territs = all_territs_in_svg svg
+svg = WarLightSVG.new(settings["svgfile"])
+territs = svg.all_polygons_as_points
 
 centerpoints = {}
 
@@ -61,33 +54,16 @@ puts ""
 puts "Great, we've done it! Uploading data..."
 puts ""
 
-# FIXME needs updating to JSON API
-#
-req = {
-  'email' => email,
-  'APIToken' => APIToken,
-  "mapID" => mapid,
-  "commands"  =>  [
-  ]
-}
+# add host and path to settings
+settings[:host] = "warlight.net"
+settings[:path] = '/API/SetMapDetails'
+client = WarLightAPIClient.new(settings)
 
+# add all commands into client
 centerpoints.each_pair do |id, point|
-  req["commands"].push({
+  client.add_command({
     "command" => 'setTerritoryCenterPoint', id: id, x: point.x, y: point.y
   })
 end
   
-json = req.to_json
-
-api = 'https://warlight.net'
-
-http = Net::HTTP.start('warlight.net')
-response = http.post('/API/SetMapDetails', json)
-
-# FIXME parse JSON and check Success property
-if response.is_a?(Net::HTTPOK) && (response.body =~ /Success/)
-  puts "It appears to have worked! Go check your map in the map designer now."
-else
-  puts "Well damn, something didn't work. :( It might be a good idea to report the error along with the data below."
-  puts response.body
-end
+client.call
