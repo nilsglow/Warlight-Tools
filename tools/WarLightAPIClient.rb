@@ -1,3 +1,6 @@
+require 'json'
+require 'net/http'
+
 class WarLightAPIClient
   attr_accessor(:path, :host)
    

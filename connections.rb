@@ -1,45 +1,24 @@
 # coding: utf-8
 
-require 'pp'
 require 'progressbar'
-
-require 'savage'
-
-require 'nokogiri'
-require 'builder'
-require 'json'
-
-require 'net/http'
 
 
 $LOAD_PATH.unshift File.dirname($0)+"/tools"
 # from ./tools/
-require 'extensions'
-require 'bezier_curves'
-require 'area_centroid'
-require 'svg_territory_parsing'
+require 'warlight'
 
 
-settings = "config/production.yml"
-abort "Settings file #{settings} not found!" if !File.exist? settings
 
-require 'yaml'
-settings = YAML::load_file settings
+include WarLight
+settings = WarLight::load_settings
 
-# check all required settings are there
-["svgfile", "mapid", "email", "APIToken"].each {|key|
-  abort "#{key} not found in settings!" if !settings.key?(key) or !settings[key]
-}
-
-abort "File #{settings["svgfile"]} not found!" if !File.exist? settings["svgfile"]
 
 
 puts 'Working... this may take some time. Go have a cup of tea or something.'
 $talktome = true
 
-svg = File.read infile
-territs = all_territs_in_svg svg
-
+svg = WarLightSVG.new(settings["svgfile"])
+territs = svg.all_polygons_as_points
 
 class Array
   attr_accessor :_bbox_cache
@@ -113,32 +92,21 @@ puts ""
 
 
 
-#
-req = {
-  'email' => email,
-  'APIToken' => APIToken,
-  "mapID" => mapid,
-  "commands"  =>  [
-  ]
-}
+# add host and path to settings
+settings[:host] = "warlight.net"
+settings[:path] = '/API/SetMapDetails'
+client = WarLightAPIClient.new(settings)
 
+# add all commands into client
+centerpoints.each_pair do |id, point|
+  client.add_command({
+    "command" => 'setTerritoryCenterPoint', id: id, x: point.x, y: point.y
+  })
+end
 connections.each do |id1, id2|
-  req["commands"].push({
+  client.add_command({
     "command" => 'addTerritoryConnection', id1: id1, id2: id2, wrap: 'Normal'
   })
 end
-  
-json = req.to_json
 
-api = 'https://warlight.net'
-
-http = Net::HTTP.start('warlight.net')
-response = http.post('/API/SetMapDetails', json)
-
-# FIXME parse JSON and check Success property
-if response.is_a?(Net::HTTPOK) && (response.body =~ /Success/)
-  puts "It appears to have worked! Go check your map in the map designer now."
-else
-  puts "Well damn, something didn't work. :( It might be a good idea to report the error along with the data below."
-  puts response.body
-end
+client.call
