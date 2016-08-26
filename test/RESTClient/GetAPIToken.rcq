@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rest-client version="3.6.1"><request><http-version>1.1</http-version><http-follow-redirects/><URL>https://www.warlight.net/API/GetAPIToken</URL><method>POST</method><ssl><hostname-verifier>STRICT</hostname-verifier></ssl><body><string content-type="application/x-www-form-urlencoded" charset="UTF-8">Email=nils@studio19.at&amp;Password=</string></body><test-script>/*
+* This is a template provided by RESTClient. Modify as per need.
+*/
+
+// The test class name should end with `Test'--this is a convention:
+public class TemplateClassTest 
+    extends org.wiztools.restclient.RESTTestCase {
+
+  // Test method names must start with `test':
+  public void testStatus() {
+    if(response.getStatusCode() != 200) {
+      fail("This will fail the test!");
+    }
+  }
+
+}</test-script></request></rest-client>
