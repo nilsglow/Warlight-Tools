@@ -20,9 +20,11 @@ HTTP API.
    territory name into inkscape label)
 4. call the scripts:
 
+    ```
     ruby centerpoints.rb
     ruby connections.rb
     ruby territory_names.rb
+    ```
  
 
 ## Further ideas
