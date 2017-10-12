@@ -5,7 +5,7 @@ Currently there are 3 tools:
 
 * centerpoints.rb - Calculates centerpoints of territory polygons
 * connections.rb - Calculates which territory pairs border each other
-* territory_names.rb - reads the *inkscape:label* attribute of each territory
+* territory_names.rb - reads the `inkscape:label` attribute of each territory
   and uses it as the territory name
 
 Each of the scripts the submits its findings to the WarLight server via the
